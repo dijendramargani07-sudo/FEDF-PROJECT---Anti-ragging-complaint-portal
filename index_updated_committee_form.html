@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeCampus — Anonymous Anti-Ragging Complaint System</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="shield"><i class="ti ti-shield-check"></i></div>
+      <div>
+        <h1>SafeCampus</h1>
+        <span>Anonymous Anti-Ragging Complaint System</span>
+      </div>
+    </div>
+    <div class="topbar-nav">
+      <button class="nav-btn active" onclick="switchView('submit')">Submit Complaint</button>
+      <button class="nav-btn" onclick="switchView('track')">Track Status</button>
+      <button class="nav-btn" onclick="switchView('admin')">Admin Panel</button>
+      <button class="nav-btn" onclick="switchView('reports')">Reports</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Student</div>
+        <div class="sb-item active" id="sb-submit" onclick="switchView('submit')">
+          <i class="ti ti-file-plus"></i> New complaint
+        </div>
+        <div class="sb-item" id="sb-track" onclick="switchView('track')">
+          <i class="ti ti-map-search"></i> Track my case
+        </div>
+        <div class="sb-item" id="sb-notif" onclick="switchView('notif')">
+          <i class="ti ti-bell"></i> Notifications
+          <span class="sb-badge">3</span>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Administration</div>
+        <div class="sb-item" id="sb-admin" onclick="switchView('admin')">
+          <i class="ti ti-layout-dashboard"></i> Dashboard
+          <span class="badge badge-new" style="font-size:12px" id="dashboardPendingBadge">0 pending</span>
+        </div>
+        <div class="sb-item" id="sb-complaints" onclick="switchView('complaints')">
+          <i class="ti ti-list-details"></i> All complaints
+        </div>
+        <div class="sb-item" id="sb-committee" onclick="switchView('committee')">
+          <i class="ti ti-users"></i> Committee
+        </div>
+        <div class="sb-item" id="sb-reports" onclick="switchView('reports')">
+          <i class="ti ti-chart-bar"></i> Reports
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT AREA -->
+    <div class="content">
+
+      <!-- ======================== SUBMIT COMPLAINT ======================== -->
+      <div class="view active" id="view-submit">
+        <div class="page-header">
+          <h2>Submit a Complaint</h2>
+          <p>Your identity is protected. You may choose to remain fully anonymous at any time.</p>
+        </div>
+
+        <div id="submitConfirm" class="confirm-banner">
+          <i class="ti ti-circle-check"></i>
+          <div>
+            <h4>Complaint submitted successfully</h4>
+            <p>Your unique tracking ID is shown below. Save it to monitor your complaint status at any time.</p>
+            <div class="tracking-id" id="confirmId">ARS-2024-0831</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="anon-toggle" onclick="toggleAnon()">
+            <input type="checkbox" id="anonCheck" checked onclick="event.stopPropagation();toggleAnonDirect(this)">
+            <div class="info">
+              <strong>Submit anonymously</strong>
+              <small>Your name and contact details will not be stored or shared with anyone — not even administrators</small>
+            </div>
+            <i class="ti ti-shield-lock anon-icon"></i>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="form-row">
+            <div class="form-group" id="nameGroup">
+              <label>Your name (optional if anonymous)</label>
+              <input type="text" id="nameInput" placeholder="Leave blank to stay completely anonymous">
+            </div>
+            <div class="form-group">
+              <label>Incident date *</label>
+              <input type="date" id="incidentDate" value="2024-11-15">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Department / Branch *</label>
+              <select id="deptSelect">
+                <option value="">— Select department —</option>
+                <option>Computer Science &amp; Engineering</option>
+                <option>Electronics &amp; Communication</option>
+                <option>Mechanical Engineering</option>
+                <option>Civil Engineering</option>
+                <option>Business Administration</option>
+                <option>Pharmacy</option>
+                <option>Law</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Incident location *</label>
+              <input type="text" placeholder="e.g. Hostel Block B, Room 204 / Canteen">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Type of incident *</label>
+              <select>
+                <option value="">— Select type —</option>
+                <option>Physical harassment</option>
+                <option>Verbal abuse / threats</option>
+                <option>Forced activity</option>
+                <option>Cyberbullying</option>
+                <option>Mental / emotional harassment</option>
+                <option>Financial exploitation</option>
+                <option>Sexual harassment</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Severity level *</label>
+              <div class="severity-row">
+                <div class="sev-opt" id="sev-low" onclick="setSev('low')">
+                  <i class="ti ti-minus"></i><br>Low
+                </div>
+                <div class="sev-opt sel-med" id="sev-med" onclick="setSev('med')">
+                  <i class="ti ti-flame"></i><br>Medium
+                </div>
+                <div class="sev-opt" id="sev-high" onclick="setSev('high')">
+                  <i class="ti ti-alert-triangle"></i><br>High
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Describe the incident in detail *</label>
+              <textarea rows="5" placeholder="Describe what happened, who was involved (you may use initials or roles like 'a 3rd-year student'), and any other relevant details. All information is treated with strict confidentiality."></textarea>
+            </div>
+          </div>
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Witnesses (optional — use initials or roll numbers only)</label>
+              <input type="text" placeholder="e.g. R.K. (3rd year, Room 112), T.M. (Roll No. 20CS047)">
+            </div>
+          </div>
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Supporting evidence (optional)</label>
+              <div class="upload-box">
+                <i class="ti ti-upload" style="font-size:26px;display:block;margin-bottom:8px;opacity:.4"></i>
+                Click to upload photos, screenshots, audio clips, or documents<br>
+                <span style="font-size:11px;color:var(--hint)">Accepted: JPG, PNG, PDF, MP3, MP4 (max 10MB each)</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem;gap:1rem;flex-wrap:wrap">
+            <p class="security-note">
+              <i class="ti ti-lock" style="font-size:14px;flex-shrink:0"></i>
+              All submissions are end-to-end encrypted. For anonymous complaints, no IP address, device fingerprint, or session data is logged.
+            </p>
+            <button class="submit-btn" onclick="submitComplaint()">
+              <i class="ti ti-send"></i> Submit complaint
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== TRACK STATUS ======================== -->
+      <div class="view" id="view-track">
+        <div class="page-header">
+          <h2>Track your complaint</h2>
+          <p>Enter your confidential tracking ID to check the current status and any updates.</p>
+        </div>
+        <div class="card">
+          <div class="search-bar">
+            <i class="ti ti-search"></i>
+            <input type="text" id="trackInput" placeholder="Enter tracking ID  (e.g. ARS-2024-0847)" value="ARS-2024-0831">
+            <button class="action-btn" style="border-color:var(--navy);color:var(--navy);font-weight:600" onclick="showTracking()">Track status</button>
+          </div>
+        </div>
+        <div id="trackingResult" style="display:none">
+          <div class="tracking-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem">
+              <div>
+                <p style="font-size:12px;color:var(--muted)">Case ID</p>
+                <p style="font-size:18px;font-weight:700;font-family:'Courier New',monospace" id="trackIdDisplay">ARS-2024-0831</p>
+              </div>
+              <span class="badge badge-progress" style="font-size:12px;padding:5px 12px">In Progress</span>
+            </div>
+            <div class="status-flow">
+              <div class="sf-step done">Submitted</div>
+              <div class="sf-arrow done"></div>
+              <div class="sf-step done">Assigned</div>
+              <div class="sf-arrow active"></div>
+              <div class="sf-step active">Under Review</div>
+              <div class="sf-arrow"></div>
+              <div class="sf-step">Hearing</div>
+              <div class="sf-arrow"></div>
+              <div class="sf-step">Resolved</div>
+            </div>
+            <div class="track-steps" style="margin-top:1.5rem">
+              <div class="track-step">
+                <div class="track-step-line"></div>
+                <div class="ts-dot done"><i class="ti ti-check"></i></div>
+                <div class="ts-body">
+                  <strong>Complaint received</strong>
+                  <small>Nov 15, 2024 · 3:42 PM — System generated tracking ID ARS-2024-0831</small>
+                </div>
+              </div>
+              <div class="track-step">
+                <div class="track-step-line"></div>
+                <div class="ts-dot done"><i class="ti ti-check"></i></div>
+                <div class="ts-body">
+                  <strong>Assigned to committee</strong>
+                  <small>Nov 16, 2024 · 10:15 AM — Case assigned to Anti-Ragging Committee Member</small>
+                </div>
+              </div>
+              <div class="track-step">
+                <div class="track-step-line"></div>
+                <div class="ts-dot active"><i class="ti ti-clock"></i></div>
+                <div class="ts-body">
+                  <strong>Under review</strong>
+                  <small>Nov 17, 2024 · Ongoing — Initial statements are being collected from relevant parties</small>
+                </div>
+              </div>
+              <div class="track-step">
+                <div class="track-step-line"></div>
+                <div class="ts-dot"><i class="ti ti-calendar"></i></div>
+                <div class="ts-body">
+                  <strong>Hearing</strong>
+                  <small>Pending — Expected to be scheduled within 7 working days</small>
+                </div>
+              </div>
+              <div class="track-step">
+                <div class="ts-dot"><i class="ti ti-circle-check"></i></div>
+                <div class="ts-body">
+                  <strong>Resolution</strong>
+                  <small>Pending — Awaiting completion of prior steps</small>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:1.25rem;padding:12px;background:var(--surface2);border-radius:var(--r);font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:flex-start">
+              <i class="ti ti-info-circle" style="font-size:15px;flex-shrink:0;margin-top:1px"></i>
+              <span>Last updated: November 17, 2024 at 2:30 PM. Your complaint is being actively reviewed by the committee. You will be notified of any status changes.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== ADMIN DASHBOARD ======================== -->
+      <div class="view" id="view-admin">
+        <div class="page-header">
+          <h2>Admin Dashboard</h2>
+          <p>Real-time overview of all complaints and committee activity this academic year.</p>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="label">Total complaints</div>
+            <div class="value" id="dashTotal">0</div>
+            <div class="sub">This academic year</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Pending assignment</div>
+            <div class="value val-red" id="dashPending">0</div>
+            <div class="sub">Needs immediate action</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">In progress</div>
+            <div class="value val-amber" id="dashProgress">0</div>
+            <div class="sub">Active investigations</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Resolved</div>
+            <div class="value val-green" id="dashResolved">0</div>
+            <div class="sub">64% resolution rate</div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <p style="font-size:13px;font-weight:700;margin-bottom:1rem">Complaints by month (2024)</p>
+            <div class="chart-bars">
+              <div class="bar-col"><div class="bar-fill" style="height:36px" title="July: 5"></div><div class="bar-label">Jul</div></div>
+              <div class="bar-col"><div class="bar-fill" style="height:52px" title="August: 7"></div><div class="bar-label">Aug</div></div>
+              <div class="bar-col"><div class="bar-fill" style="height:26px" title="September: 3"></div><div class="bar-label">Sep</div></div>
+              <div class="bar-col"><div class="bar-fill" style="height:65px" title="October: 9"></div><div class="bar-label">Oct</div></div>
+              <div class="bar-col"><div class="bar-fill" style="height:48px" title="November: 6"></div><div class="bar-label">Nov</div></div>
+              <div class="bar-col"><div class="bar-fill" style="height:28px;opacity:.3" title="December: est."></div><div class="bar-label">Dec</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <p style="font-size:13px;font-weight:700;margin-bottom:1rem">Breakdown by incident type</p>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--muted)">Verbal abuse</span><span style="font-weight:600">18</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:62%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--muted)">Physical harassment</span><span style="font-weight:600">12</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:41%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--muted)">Forced activity</span><span style="font-weight:600">9</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:31%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--muted)">Cyberbullying</span><span style="font-weight:600">5</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:17%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--muted)">Other</span><span style="font-weight:600">3</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:10%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:1rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+            <p style="font-size:13px;font-weight:700">Unassigned complaints requiring action</p>
+            <span class="badge badge-new" style="font-size:12px" id="dashboardPendingBadge">0 pending</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Case ID</th><th>Date</th><th>Type</th><th>Severity</th><th>Status</th><th>Action</th></tr>
+              </thead>
+              <tbody id="dashboardComplaintsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== ALL COMPLAINTS ======================== -->
+      <div class="view" id="view-complaints">
+        <div class="page-header">
+          <h2>All Complaints</h2>
+          <p>Search, filter and manage every case in the system.</p>
+        </div>
+        <div class="filter-bar">
+          <select><option>All statuses</option><option>New</option><option>Open</option><option>In Progress</option><option>Resolved</option></select>
+          <select><option>All severity</option><option>High</option><option>Medium</option><option>Low</option></select>
+          <select><option>All types</option><option>Verbal abuse</option><option>Physical</option><option>Forced activity</option><option>Cyberbullying</option><option>Other</option></select>
+          <select><option>All departments</option><option>CSE</option><option>ECE</option><option>Mechanical</option><option>Civil</option><option>MBA</option></select>
+          <input type="text" placeholder="Search by ID or keyword…" style="width:180px">
+          <div class="spacer"></div>
+          <button class="export-btn"><i class="ti ti-download"></i> Export CSV</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Case ID</th><th>Filed on</th><th>Type</th><th>Department</th><th>Severity</th><th>Anonymous</th><th>Assigned to</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody id="complaintsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== COMMITTEE ======================== -->
+      <div class="view" id="view-committee">
+        <div class="page-header">
+          <h2>Committee Members</h2>
+          <p>Authorized personnel responsible for complaint investigation and resolution.</p>
+        </div>
+        <div class="two-col" id="committeeContainer">
+          <div class="member-card">
+            <div class="avatar">PS</div>
+            <div class="member-info">
+              <h4>Dr. Priya Sharma</h4>
+              <p>Chairperson · Computer Science Dept.</p>
+              <div class="member-badges">
+                <span class="badge badge-progress">4 active cases</span>
+                <span class="badge badge-resolved">12 resolved</span>
+              </div>
+            </div>
+          </div>
+          <div class="member-card">
+            <div class="avatar">RG</div>
+            <div class="member-info">
+              <h4>Dr. Rajesh Gupta</h4>
+              <p>Member · Electronics &amp; Comm. Dept.</p>
+              <div class="member-badges">
+                <span class="badge badge-progress">3 active cases</span>
+                <span class="badge badge-resolved">9 resolved</span>
+              </div>
+            </div>
+          </div>
+          <div class="member-card">
+            <div class="avatar">KM</div>
+            <div class="member-info">
+              <h4>Prof. Kavita Mehta</h4>
+              <p>Member · Student Welfare Office</p>
+              <div class="member-badges">
+                <span class="badge badge-progress">5 active cases</span>
+                <span class="badge badge-resolved">7 resolved</span>
+              </div>
+            </div>
+          </div>
+          <div class="member-card">
+            <div class="avatar">AN</div>
+            <div class="member-info">
+              <h4>Ms. Anita Nair</h4>
+              <p>Student Representative · Final Year</p>
+              <div class="member-badges">
+                <span class="badge badge-progress">2 active cases</span>
+                <span class="badge badge-resolved">4 resolved</span>
+              </div>
+            </div>
+          </div>
+          <div class="member-card">
+            <div class="avatar">VP</div>
+            <div class="member-info">
+              <h4>Dr. Vikram Patel</h4>
+              <p>Legal Advisor · External Member</p>
+              <div class="member-badges">
+                <span class="badge badge-progress">1 active case</span>
+                <span class="badge badge-resolved">6 resolved</span>
+              </div>
+            </div>
+          </div>
+          <div class="member-card" id="addMemberCard" style="border:1.5px dashed var(--border2);background:transparent;align-items:center;justify-content:center;min-height:100px;cursor:pointer" onclick="openMemberForm()">
+            <div style="text-align:center;color:var(--muted)">
+              <i class="ti ti-user-plus" style="font-size:28px;display:block;margin-bottom:6px;opacity:.4"></i>
+              <span style="font-size:13px">Add committee member</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="memberForm" style="display:none;margin-top:1rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem">
+            <div>
+              <h3 style="font-size:16px;margin-bottom:4px">Add Committee Member</h3>
+              <p style="font-size:12px;color:var(--muted)">New members will be saved and shown in the assignment dropdown.</p>
+            </div>
+            <button class="close-btn" onclick="closeMemberForm()" aria-label="Close form">×</button>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Member name *</label>
+              <input type="text" id="memberName" placeholder="e.g. Dr. Suresh Kumar">
+            </div>
+            <div class="form-group">
+              <label>Role *</label>
+              <input type="text" id="memberRole" placeholder="e.g. Member / Chairperson">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Department *</label>
+              <input type="text" id="memberDept" placeholder="e.g. CSE Department">
+            </div>
+            <div class="form-group">
+              <label>Email / Contact</label>
+              <input type="text" id="memberEmail" placeholder="e.g. member@college.edu">
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+            <button class="action-btn" onclick="closeMemberForm()">Cancel</button>
+            <button class="assign-btn" style="width:auto;margin-top:0" onclick="addCommitteeMember()">
+              <i class="ti ti-user-plus"></i> Add member
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== REPORTS ======================== -->
+      <div class="view" id="view-reports">
+        <div class="page-header">
+          <h2>Reports &amp; Export</h2>
+          <p>Generate statutory reports and export complaint data for institutional and regulatory records.</p>
+        </div>
+        <div class="report-grid">
+          <div class="report-card">
+            <i class="ti ti-file-text rc-icon"></i>
+            <h4>Monthly Summary Report</h4>
+            <p>Complaint counts, resolution rates, average closure time, and committee activity for the selected month.</p>
+            <button class="dl-btn" onclick="generateMonthlyPDF()"><i class="ti ti-download"></i> Download PDF</button>
+          </div>
+          <div class="report-card">
+            <i class="ti ti-report-analytics rc-icon"></i>
+            <h4>UGC Statutory Report</h4>
+            <p>Formatted in compliance with UGC Anti-Ragging Regulations 2009 — ready for submission to the regulatory body.</p>
+            <button class="dl-btn" onclick="generateUGCReport()"><i class="ti ti-download"></i> Download PDF</button>
+          </div>
+          <div class="report-card">
+            <i class="ti ti-table rc-icon"></i>
+            <h4>Full Complaint Export</h4>
+            <p>All complaint records including status history, committee notes, assignment details, and resolution outcomes in CSV format.</p>
+            <button class="dl-btn" onclick="exportCSV()"><i class="ti ti-download"></i> Download CSV</button>
+          </div>
+          <div class="report-card">
+            <i class="ti ti-chart-pie rc-icon"></i>
+            <h4>Annual Analytics Report</h4>
+            <p>Trend analysis, department-wise incident breakdown, severity distribution, and resolution time statistics for the full academic year.</p>
+            <button class="dl-btn" onclick="generateAnnualReport()"><i class="ti ti-download"></i> Download PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== NOTIFICATIONS ======================== -->
+      <div class="view" id="view-notif">
+        <div class="page-header">
+          <h2>Notifications</h2>
+          <p>System alerts and status updates on complaints.</p>
+        </div>
+        <div class="notif-list">
+        <div id="notificationsList"></div>
+      </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- CASE DETAIL PANEL -->
+<div class="detail-panel" id="detailPanel">
+  <div class="detail-header">
+    <h3 id="detailTitle">Case details</h3>
+    <button class="close-btn" onclick="closeDetail()" aria-label="Close panel">×</button>
+  </div>
+  <div class="detail-body">
+    <div class="detail-section">
+      <h4>Case information</h4>
+      <div class="detail-field"><span>Case ID</span><span style="font-family:'Courier New',monospace;font-size:12px" id="d-id">—</span></div>
+      <div class="detail-field"><span>Filed on</span><span id="d-date">—</span></div>
+      <div class="detail-field"><span>Type of incident</span><span id="d-type">—</span></div>
+      <div class="detail-field"><span>Severity</span><span id="d-sev-wrap"><span class="badge badge-new" id="d-sev">—</span></span></div>
+      <div class="detail-field"><span>Anonymous submission</span><span><span class="badge badge-anon"><i class="ti ti-user-off"></i> Yes</span></span></div>
+      <div class="detail-field"><span>Current status</span><span><span class="badge badge-new" id="d-status">New</span></span></div>
+    </div>
+    <div class="detail-section">
+      <h4>Assign to committee member</h4>
+      <select class="assign-select" id="assignSelect">
+        <option value="">— Select a member —</option>
+        <option>Dr. Priya Sharma</option>
+        <option>Dr. Rajesh Gupta</option>
+        <option>Prof. Kavita Mehta</option>
+        <option>Ms. Anita Nair</option>
+        <option>Dr. Vikram Patel</option>
+      </select>
+      <button class="assign-btn" onclick="assignCase()"><i class="ti ti-user-check"></i> Assign case</button>
+    </div>
+    <div class="detail-section">
+      <h4>Change status</h4>
+      <select class="assign-select" id="statusSelect">
+        <option value="new">New</option>
+        <option value="open">Open</option>
+        <option value="in-progress">In Progress</option>
+        <option value="resolved">Resolved</option>
+      </select>
+      <button class="assign-btn" style="margin-top:6px;background:var(--navy3)" onclick="updateStatus()"><i class="ti ti-refresh"></i> Update status</button>
+    </div>
+    <div class="detail-section">
+      <h4>Committee notes (internal only)</h4>
+      <textarea class="assign-select" style="min-height:90px;resize:vertical;padding:10px" placeholder="Add internal notes visible only to committee members. These are not shown to the complainant."></textarea>
+      <button class="assign-btn" style="margin-top:6px;background:#444"><i class="ti ti-device-floppy"></i> Save notes</button>
+    </div>
+    <div class="detail-section">
+      <h4>Activity log</h4>
+      <div id="activityLog">
+        <div class="timeline-item">
+          <div class="tl-dot"></div>
+          <div class="tl-info">
+            <strong>Complaint received</strong>
+            <small>System · Tracking ID auto-generated</small>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-dot"></div>
+          <div class="tl-info">
+            <strong>Automatically flagged by severity classifier</strong>
+            <small>System · Risk assessment complete</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ASSIGN SUCCESS MODAL -->
+<div class="modal-overlay" id="assignModal">
+  <div class="modal">
+    <i class="ti ti-circle-check" style="font-size:32px;color:var(--green);display:block;margin-bottom:12px"></i>
+    <h3>Case assigned successfully</h3>
+    <p>The complaint has been assigned to <strong id="assignedName">the selected member</strong>. They have been notified via email and the case status has been updated to <strong>Open</strong>.</p>
+    <div class="modal-actions">
+      <button class="modal-confirm" onclick="closeModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+const COMMITTEE_STORAGE_KEY = "safeCampusCommitteeMembers";
+
+function openMemberForm() {
+  const form = document.getElementById("memberForm");
+  if (form) form.style.display = "block";
+  const nameInput = document.getElementById("memberName");
+  if (nameInput) nameInput.focus();
+}
+
+function closeMemberForm() {
+  const form = document.getElementById("memberForm");
+  if (form) form.style.display = "none";
+}
+
+function getSavedCommitteeMembers() {
+  return JSON.parse(localStorage.getItem(COMMITTEE_STORAGE_KEY) || "[]");
+}
+
+function saveCommitteeMembers(members) {
+  localStorage.setItem(COMMITTEE_STORAGE_KEY, JSON.stringify(members));
+}
+
+function getInitials(name) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .map(part => part[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+}
+
+function addCommitteeMember() {
+  const name = document.getElementById("memberName").value.trim();
+  const role = document.getElementById("memberRole").value.trim();
+  const dept = document.getElementById("memberDept").value.trim();
+  const email = document.getElementById("memberEmail").value.trim();
+
+  if (!name || !role || !dept) {
+    alert("Please enter member name, role and department.");
+    return;
+  }
+
+  const members = getSavedCommitteeMembers();
+  const alreadyExists = members.some(member => member.name.toLowerCase() === name.toLowerCase());
+
+  if (alreadyExists) {
+    alert("This committee member is already added.");
+    return;
+  }
+
+  members.push({
+    name,
+    role,
+    dept,
+    email,
+    activeCases: 0,
+    resolvedCases: 0
+  });
+
+  saveCommitteeMembers(members);
+  renderCommitteeMembers();
+  updateAssignDropdown();
+
+  document.getElementById("memberName").value = "";
+  document.getElementById("memberRole").value = "";
+  document.getElementById("memberDept").value = "";
+  document.getElementById("memberEmail").value = "";
+  closeMemberForm();
+}
+
+function renderCommitteeMembers() {
+  const container = document.getElementById("committeeContainer");
+  const addCard = document.getElementById("addMemberCard");
+  if (!container || !addCard) return;
+
+  document.querySelectorAll(".dynamic-member-card").forEach(card => card.remove());
+
+  getSavedCommitteeMembers().forEach(member => {
+    const card = document.createElement("div");
+    card.className = "member-card dynamic-member-card";
+    card.innerHTML = `
+      <div class="avatar">${getInitials(member.name)}</div>
+      <div class="member-info">
+        <h4>${member.name}</h4>
+        <p>${member.role} · ${member.dept}</p>
+        ${member.email ? `<p style="font-size:11px;color:var(--muted)">${member.email}</p>` : ""}
+        <div class="member-badges">
+          <span class="badge badge-progress">${member.activeCases || 0} active cases</span>
+          <span class="badge badge-resolved">${member.resolvedCases || 0} resolved</span>
+        </div>
+      </div>
+    `;
+    container.insertBefore(card, addCard);
+  });
+}
+
+function updateAssignDropdown() {
+  const assignSelect = document.getElementById("assignSelect");
+  if (!assignSelect) return;
+
+  const savedValue = assignSelect.value;
+  const existingNames = Array.from(assignSelect.options).map(option => option.value || option.textContent.trim());
+
+  getSavedCommitteeMembers().forEach(member => {
+    if (!existingNames.includes(member.name)) {
+      const option = document.createElement("option");
+      option.value = member.name;
+      option.textContent = member.name;
+      assignSelect.appendChild(option);
+    }
+  });
+
+  if (savedValue) assignSelect.value = savedValue;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderCommitteeMembers();
+  updateAssignDropdown();
+});
+</script>
+<script src="js/navigation.js"></script>
+<script src="js/complaints.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/assignment.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+</body>
+</html>
